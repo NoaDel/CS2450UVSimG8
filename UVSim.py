@@ -1,4 +1,12 @@
 class UVSim:
+    def __init__(self):
+        self.memory = [0] * 100
+        self.accumulator = 0
+        self.instruction_counter = 0
+
+    def load_program(self, program):
+        for i, instruction in enumerate(program):
+            self.memory[i] = instruction
     
     # I/O Operations
     def read(self, operand):
@@ -69,3 +77,65 @@ class UVSim:
         print("Program halted.")
         return False  # Signal to stop execution
 
+    def execute_program(self):
+        while True:
+            instruction = self.memory[self.instruction_counter]
+            opcode = instruction // 100
+            operand = instruction % 100
+
+            self.instruction_counter += 1
+
+            # Execute the appropriate function based on the opcode
+            if opcode == 10:
+                self.read(operand)
+            elif opcode == 11:
+                self.write(operand)
+            elif opcode == 20:
+                self.load(operand)
+            elif opcode == 21:
+                self.store(operand)
+            elif opcode == 30:
+                if not self.add(operand):
+                    break
+            elif opcode == 31:
+                if not self.subtract(operand):
+                    break
+            elif opcode == 32:
+                if not self.divide(operand):
+                    break
+            elif opcode == 33:
+                if not self.multiply(operand):
+                    break
+            elif opcode == 40:
+                self.branch(operand)
+            elif opcode == 41:
+                self.branchneg(operand)
+            elif opcode == 42:
+                self.branchzero(operand)
+            elif opcode == 43:
+                if self.halt(operand) == False:
+                    break
+            else:
+                print("Error: Invalid opcode.")
+                break
+
+            # Check for accumulator overflow after potential overflow operations
+            if not -9999 <= self.accumulator <= 9999:
+                print("Error: Accumulator overflow.")
+                return
+
+if __name__ == "__main__":
+    simulator = UVSim()
+
+    program = [
+        1095,  # READ A
+        1096,  # READ B
+        2095,  # LOAD A
+        3096,  # ADD B
+        2197,  # STORE RESULT
+        1197,  # WRITE RESULT
+        4300,  # HALT
+    ]
+
+    simulator.load_program(program)
+    simulator.execute_program()
