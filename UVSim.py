@@ -1,67 +1,71 @@
 class UVSim:
-    def __init__(self):
-        self.memory = [0] * 100
-        self.accumulator = 0
-        self.instruction_counter = 0
-
-    def load_program(self, program):
-        for i, instruction in enumerate(program):
-            self.memory[i] = instruction
-
-    def execute_program(self):
-        while True:
-            instruction = self.memory[self.instruction_counter]
-            opcode = instruction // 100
-            operand = instruction % 100
-
-            self.instruction_counter += 1
-
-            # Execute the appropriate function based on the opcode
-            if opcode == 10:
-                break;
-            elif opcode == 11:
-                break;
-            elif opcode == 20:
-                break;
-            elif opcode == 21:
-                break;
-            elif opcode == 30:
-                break;
-            elif opcode == 31:
-                break;
-            elif opcode == 32:
-                break;
-            elif opcode == 33:
-                break;
-            elif opcode == 40:
-                break;
-            elif opcode == 41:
-                break;
-            elif opcode == 42:
-                break;
-            elif opcode == 43:
-                break;
+    
+    # I/O Operations
+    def read(self, operand):
+        try:
+            value = int(input("Enter an integer: "))
+            if -9999 <= value <= 9999:
+                self.memory[operand] = value
             else:
-                break;
+                print("Error: Input out of range (-9999 to 9999).")
+                self.instruction_counter -= 1  # Re-execute
+        except ValueError:
+            print("Error: Invalid input. Please enter an integer.")
+            if (self.instruction_counter > 0):
+                self.instruction_counter -= 1  # Re-execute
 
-            # Check for accumulator overflow after potential overflow operations
-            if not -9999 <= self.accumulator <= 9999:
-                print("Error: Accumulator overflow.")
-                return
+    def write(self, operand):
+        print("Output:", self.memory[operand])
 
+    # Load/Store Operations
+    def load(self, operand):
+        self.accumulator = self.memory[operand]
 
-if __name__ == "__main__":
-    simulator = UVSim()
+    def store(self, operand):
+        self.memory[operand] = self.accumulator
 
-    program = [
-        1095,  # READ A
-        1096,  # READ B
-        2095,  # LOAD A
-        3096,  # ADD B
-        2197,  # STORE RESULT
-        1197,  # WRITE RESULT
-        4300,  # HALT
-    ]
+    # Arithmetic Operations
+    def add(self, operand):
+        self.accumulator += self.memory[operand]
+        if not (-9999 <= self.accumulator <= 9999):
+            print("Error: Overflow during addition.")
+            return False
+        return True
 
-    simulator.load_program(program)
-    simulator.execute_program()
+    def subtract(self, operand):
+        self.accumulator -= self.memory[operand]
+        if not (-9999 <= self.accumulator <= 9999):
+            print("Error: Overflow during subtraction.")
+            return False
+        return True
+
+    def divide(self, operand):
+        if self.memory[operand] == 0:
+            print("Error: Division by zero.")
+            return False
+        self.accumulator //= self.memory[operand]
+        return True
+
+    def multiply(self, operand):
+        self.accumulator *= self.memory[operand]
+        if not (-9999 <= self.accumulator <= 9999):
+            print("Error: Overflow during multiplication.")
+            return False
+        return True
+
+    # Control Operations
+    def branch(self, operand):
+        self.instruction_counter = operand
+
+    def branchneg(self, operand):
+        if self.accumulator < 0:
+            self.instruction_counter = operand
+
+    def branchzero(self, operand):
+        if self.accumulator == 0:
+            self.instruction_counter = operand
+
+    def halt(self, operand):
+        print("Program halted.")
+        return False  # Signal to stop execution
+
