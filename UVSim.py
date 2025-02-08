@@ -1,3 +1,5 @@
+import sys
+
 class UVSim:
     def __init__(self):
         self.memory = [0] * 100
@@ -124,18 +126,24 @@ class UVSim:
                 print("Error: Accumulator overflow.")
                 return
 
+def read_file(filename):
+    try:
+        with open(filename, 'r') as file:
+            lines = file.readlines()  # Reads all lines into a list
+            # print(lines)
+            my_program = [int(line.strip().lstrip('+')) for line in lines]
+            # print(my_program)
+            return my_program
+            # You can further process 'values' as needed
+    except FileNotFoundError:
+        print(f"Error: The file '{filename}' was not found.")
+    except Exception:
+        print(f"'{filename}' could not be read.")
+
 if __name__ == "__main__":
     simulator = UVSim()
-
-    program = [
-        1095,  # READ A
-        1096,  # READ B
-        2095,  # LOAD A
-        3096,  # ADD B
-        2197,  # STORE RESULT
-        1197,  # WRITE RESULT
-        4300,  # HALT
-    ]
+    input_file = sys.argv[1]
+    program = read_file(input_file)
 
     simulator.load_program(program)
     simulator.execute_program()
