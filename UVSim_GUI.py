@@ -30,7 +30,7 @@ class UVSim:
         # Instead of returning a function, we set state variables.
         self.waiting_for_input = True
         self.input_operand = operand
-        self.append_output("Enter an integer:")
+        self.output_text = "Enter an integer:\n"
 
     def write(self, operand):
         self.append_output("Output: " + str(self.memory[operand]))
@@ -85,9 +85,8 @@ class UVSim:
         return False
 
     def execute_step(self, output_callback):
-        """Executes a single step of the program."""
-        if self.waiting_for_input:  # Don't execute if waiting for input
-            return
+        if self.waiting_for_input:
+            return  
 
         if self.instruction_counter >= len(self.memory) or self.instruction_counter < 0:
             self.append_output("Error: Instruction counter out of bounds.")
@@ -95,43 +94,60 @@ class UVSim:
 
         instruction = self.memory[self.instruction_counter]
         if not isinstance(instruction, int):
-                instruction = 0
+            instruction = 0
         opcode = instruction // 100
         operand = instruction % 100
         self.instruction_counter += 1
 
         if opcode == 10:
-            self.read(operand)  # Set waiting_for_input and input_operand
-            output_callback(self.get_output()) #show prompt
+            if not self.waiting_for_input:
+                self.read(operand)  
+                output_callback(self.get_output())
+                self.reset_output()
+                return  
+
         elif opcode == 11:
             self.write(operand)
             output_callback(self.get_output())
+            self.reset_output()
+
         elif opcode == 20:
             self.load(operand)
+
         elif opcode == 21:
             self.store(operand)
+
         elif opcode == 30:
             if not self.add(operand):
                 return
+
         elif opcode == 31:
             if not self.subtract(operand):
                 return
+
         elif opcode == 32:
             if not self.divide(operand):
                 return
+
         elif opcode == 33:
             if not self.multiply(operand):
                 return
+
         elif opcode == 40:
             self.branch(operand)
+
         elif opcode == 41:
             self.branchneg(operand)
+
         elif opcode == 42:
             self.branchzero(operand)
+
         elif opcode == 43:
             if self.halt(operand) is False:
                 return
             output_callback(self.get_output())
+            self.reset_output()
+
         else:
             self.append_output("Error: Invalid opcode.")
             return
@@ -139,6 +155,7 @@ class UVSim:
         if not -9999 <= self.accumulator <= 9999:
             self.append_output("Error: Accumulator overflow.")
             return
+
 
     def provide_input(self, value):
         """Provides input to the simulator."""
@@ -150,10 +167,8 @@ class UVSim:
                 self.input_operand = None      # Clear operand
             else:
                 self.append_output("Error: Input out of range (-9999 to 9999).")
-                # Don't clear waiting_for_input, still need valid input
         except ValueError:
             self.append_output("Error: Invalid input. Please enter an integer.")
-            # Don't clear waiting_for_input, still need valid input
 
 
 class UVSimApp:
@@ -225,31 +240,43 @@ class UVSimApp:
             self.display_error("Invalid program format.")
         except Exception as e:
             self.display_error(f"An error occurred: {e}")
+        print("i ran")
 
     def continue_execution(self):
         """Continues execution until input is needed or the program halts."""
         while not self.simulator.waiting_for_input:
             self.simulator.execute_step(self.update_console)
-            if self.simulator.instruction_counter == len(self.simulator.memory): #halt instruction/end of program
+
+            if self.simulator.instruction_counter >= len(self.simulator.memory):
                 break
+
         if self.simulator.waiting_for_input:
-            self.input_button.config(state="normal")  # Enable input if needed
+            self.input_button.config(state="normal")
         else:
-            self.input_button.config(state="disabled") #program completed
+            self.input_button.config(state="disabled")
+        print("i executed")
+
 
     def process_input(self):
         user_input = self.input_entry.get()
         self.input_entry.delete(0, tk.END)
-        self.simulator.provide_input(user_input)
-        self.update_console(self.simulator.get_output())  # Update after input
-        self.continue_execution()  # Continue after providing input
 
+        self.simulator.provide_input(user_input)
+
+        pending_output = self.simulator.get_output().strip()
+
+        if pending_output:
+            self.simulator.reset_output()
+            self.update_console(pending_output)
+
+        self.continue_execution()
 
     def update_console(self, text):
         self.console_text.config(state='normal')
         self.console_text.insert(tk.END, text)
         self.console_text.config(state='disabled')
         self.console_text.see(tk.END)
+        print("i printed")
 
     def display_error(self, message):
         self.update_console("ERROR: " + message)
