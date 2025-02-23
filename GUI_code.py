@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog, scrolledtext
 from GUI_settings import default_fonts, DefaultTheme, LightTheme, DarkTheme
 from UVSim import UVSim
 from output_handler import OutputHandler
@@ -9,12 +9,19 @@ from output_handler import OutputHandler
 # TODO: Replace these with actual implementations
 
 def import_prog():
-    """Simulates importing a program. Replace with real import logic."""
+    file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
+    if file_path:
+            with open(file_path, 'r') as file:
+                GUI.text_editor.delete('1.0', tk.END)
+                GUI.text_editor.insert('1.0', file.read())
     print("importing program...")
     GUI.write_to_output("importing program...")
 
 def save_prog():
-    """Simulates saving a program. Replace with real save logic."""
+    file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
+    if file_path:
+        with open(file_path, 'w') as file:
+            file.write(GUI.text_editor.get('1.0', tk.END))
     print("saving program...")
     GUI.write_to_output("saving program...")
 
