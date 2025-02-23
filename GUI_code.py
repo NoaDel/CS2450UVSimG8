@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from GUI_settings import default_colors, default_fonts
+from GUI_settings import default_fonts, DefaultTheme, LightTheme, DarkTheme
 from UVSim import UVSim
 from output_handler import OutputHandler
 
@@ -71,13 +71,14 @@ class GUI():
 
         GUI.focus_file(new_button)
 
-    def on_hover(event, button):
+    def on_hover(event, button, color):
         """Changes button color on hover."""
-        button.config(bg=default_colors.menu_button_highlight_color)
+        button.color = button["background"]
+        button.config(bg=color)
 
     def on_leave(event, button):
         """Restores button color when not hovered."""
-        button.config(bg=default_colors.menu_button_color)
+        button.config(bg=GUI.theme.menu_button_color)
 
     def clear_output():
         GUI.output_box.config(state=tk.NORMAL)
