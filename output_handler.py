@@ -1,5 +1,5 @@
 import tkinter as tk
-
+import time
 class OutputHandler:
     output_box = None
     input_box = None
@@ -7,6 +7,12 @@ class OutputHandler:
     I recommend adding a terminal_box when making the box for integer arguments
     """
     value = 0 #Used for the hard-coded read function, edit if needed
+
+    @classmethod
+    def get_input_vals(cls, lyst):
+        cls.input_vals = []
+        for i in lyst:
+            cls.input_vals.append(int(i))
 
     @classmethod
     def set_boxes(cls, output_box, input_box):
@@ -24,12 +30,21 @@ class OutputHandler:
             cls.output_box.yview('end')
     
     @classmethod
-    def get_int_input(cls):
+    async def get_int_input(cls):
         cls.write_to_output("Enter an integer:")
         cls.input_box.config(state='normal')  # Ensure input box remains active
         cls.input_box.focus()
+        print(1)
+        last_index = cls.input_box.index("end-1c")
+        print(2)
         cls.input_box.bind("<Return>", cls.process_value())  # Bind Enter key
-        # print(cls.value)
+        print(3)
+        while cls.value != None:
+            pass
+        print(5)
+        cls.value = cls.input_box.get(str(int(last_index[0])+1)+".0", "end")
+        print(6)
+        print(cls.value)
         return cls.value
     
     @classmethod

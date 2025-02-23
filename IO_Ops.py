@@ -1,9 +1,13 @@
 from output_handler import OutputHandler
+import asyncio
+import concurrent.futures
 # I/O Operations
 class IO:
     def read(memory, instruction_counter, operand):
         # value = int(input("Enter an integer: ")) #Commenting this allows GUI to continue.
-        value = OutputHandler.get_int_input()
+        # value = OutputHandler.get_int_input()
+        value = OutputHandler.input_vals.pop(0)
+        
         if -9999 <= value <= 9999:
             memory[operand] = value
         else:

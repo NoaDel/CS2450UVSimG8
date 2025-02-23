@@ -4,10 +4,6 @@ from GUI_settings import default_fonts, DefaultTheme, LightTheme, DarkTheme
 from UVSim import UVSim
 from output_handler import OutputHandler
 
-
-# Placeholder functions for import, save, and run actions
-# TODO: Replace these with actual implementations
-
 def import_prog():
     file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
     if file_path:
@@ -15,7 +11,6 @@ def import_prog():
                 GUI.text_editor.delete('1.0', tk.END)
                 GUI.text_editor.insert('1.0', file.read())
     print("importing program...")
-    GUI.write_to_output("importing program...")
 
 def save_prog():
     file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
@@ -23,11 +18,10 @@ def save_prog():
         with open(file_path, 'w') as file:
             file.write(GUI.text_editor.get('1.0', tk.END))
     print("saving program...")
-    GUI.write_to_output("saving program...")
 
 def run_prog():
-    """Simulates running a program. Replace with actual execution logic."""
-    
+    OutputHandler.get_input_vals(GUI.input_box.get("1.0", "end-1c").split('\n'))
+
     OutputHandler.set_boxes(GUI.output_box, GUI.output_box) #Edit if needed
     simulator = UVSim()
     program = [int(line.strip().lstrip('+')) for line in GUI.read_from_editor() if line.strip()]
@@ -183,9 +177,18 @@ class GUI():
         GUI.text_editor.config(yscrollcommand=scrollbar.set)
         line_numbers.config(yscrollcommand=scrollbar.set)
 
+        # Add input frame
+        Input_frame = tk.Frame(frame, bg=GUI.theme.editor_color,width=90, padx=5,)
+        
+        # ADD a input widgets
+        GUI.input_box = tk.Text(Input_frame, wrap=tk.WORD, font=default_fonts.editor_font, fg=GUI.theme.text_color, undo=True, bg=GUI.theme.editor_color, bd=0)
+        input_label = tk.Label(Input_frame, text="(each input\nmust be on\na new line)\n\ninputs:", bg=GUI.theme.editor_color, bd=0)
         # Pack all the widgets
         line_numbers.pack(side=tk.LEFT, fill=tk.Y)
         GUI.text_editor.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        Input_frame.pack(side=tk.RIGHT, fill=tk.Y)
+        input_label.place(relx=0, rely=0, relwidth=1, relheight=.25)
+        GUI.input_box.place(relx=0, rely=.25, relwidth=1, relheight=.75)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         def update_line_numbers(event=None):
