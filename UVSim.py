@@ -1,4 +1,7 @@
 import sys
+from IO_Ops import IO
+import ArithOps, ControlOps
+from output_handler import OutputHandler
 
 class UVSim:
     def __init__(self):
@@ -9,121 +12,70 @@ class UVSim:
     def load_program(self, program):
         for i, instruction in enumerate(program):
             self.memory[i] = instruction
-    
-    # I/O Operations
-    def read(self, operand):
-        try:
-            value = int(input("Enter an integer: "))
-            if -9999 <= value <= 9999:
-                self.memory[operand] = value
-            else:
-                print("Error: Input out of range (-9999 to 9999).")
-                self.instruction_counter -= 1  # Re-execute
-        except ValueError:
-            print("Error: Invalid input. Please enter an integer.")
-            if (self.instruction_counter > 0):
-                self.instruction_counter -= 1  # Re-execute
-
-    def write(self, operand):
-        print("Output:", self.memory[operand])
-
-    # Load/Store Operations
-    def load(self, operand):
-        self.accumulator = self.memory[operand]
-
-    def store(self, operand):
-        self.memory[operand] = self.accumulator
-
-    # Arithmetic Operations
-    def add(self, operand):
-        self.accumulator += self.memory[operand]
-        if not (-9999 <= self.accumulator <= 9999):
-            print("Error: Overflow during addition.")
-            return False
-        return True
-
-    def subtract(self, operand):
-        self.accumulator -= self.memory[operand]
-        if not (-9999 <= self.accumulator <= 9999):
-            print("Error: Overflow during subtraction.")
-            return False
-        return True
-
-    def divide(self, operand):
-        if self.memory[operand] == 0:
-            print("Error: Division by zero.")
-            return False
-        self.accumulator //= self.memory[operand]
-        return True
-
-    def multiply(self, operand):
-        self.accumulator *= self.memory[operand]
-        if not (-9999 <= self.accumulator <= 9999):
-            print("Error: Overflow during multiplication.")
-            return False
-        return True
-
-    # Control Operations
-    def branch(self, operand):
-        self.instruction_counter = operand
-
-    def branchneg(self, operand):
-        if self.accumulator < 0:
-            self.instruction_counter = operand
-
-    def branchzero(self, operand):
-        if self.accumulator == 0:
-            self.instruction_counter = operand
-
-    def halt(self, operand):
-        print("Program halted.")
-        return False  # Signal to stop execution
 
     def execute_program(self):
         while True:
-            instruction = self.memory[self.instruction_counter]
-            opcode = instruction // 100
-            operand = instruction % 100
+            try:
+                instruction = self.memory[self.instruction_counter]
+                # .rstrip('\n').lstrip('+')
+                print(instruction)
+                opcode = instruction // 100
+                operand = instruction % 100
 
-            self.instruction_counter += 1
+                self.instruction_counter += 1
 
-            # Execute the appropriate function based on the opcode
-            if opcode == 10:
-                self.read(operand)
-            elif opcode == 11:
-                self.write(operand)
-            elif opcode == 20:
-                self.load(operand)
-            elif opcode == 21:
-                self.store(operand)
-            elif opcode == 30:
-                if not self.add(operand):
+                # Execute the appropriate function based on the opcode
+                if opcode == 10:
+                    # print("Counter", self.instruction_counter)
+                    self.instruction_counter = IO.read(self.memory, self.instruction_counter, operand)
+                    # print("Counter", self.instruction_counter)
+                elif opcode == 11:
+                    IO.write(self.memory, operand)
+                elif opcode == 20:
+                    self.accumulator = IO.load(self.memory, operand)
+                elif opcode == 21:
+                    self.memory[operand] = IO.store(self.accumulator)
+                elif opcode == 30:
+                    add_results = ArithOps.add(self.accumulator, self.memory, operand)
+                    if not add_results[0]: #First parameter of returned tuple check bool value
+                        break
+                    self.accumulator = add_results[1] #If adding success, put second parameter of returned tuple in accumulator
+                elif opcode == 31:
+                    sub_results = ArithOps.subtract(self.accumulator, self.memory, operand)
+                    if not sub_results[0]:
+                        break
+                    self.accumulator = sub_results[1]
+                elif opcode == 32:
+                    div_results = ArithOps.divide(self.accumulator, self.memory, operand)
+                    if not div_results[0]:
+                        break
+                    self.accumulator = div_results[1]
+                elif opcode == 33:
+                    mult_results = ArithOps.multiply(self.accumulator, self.memory, operand)
+                    if not mult_results[0]:
+                        break
+                    self.accumulator = mult_results[1]
+                elif opcode == 40:
+                    self.instruction_counter = ControlOps.branchpos(self.instruction_counter, self.accumulator, operand)
+                elif opcode == 41:
+                    self.instruction_counter = ControlOps.branchneg(self.instruction_counter, self.accumulator, operand)
+                elif opcode == 42:
+                    self.instruction_counter = ControlOps.branchzero(self.instruction_counter, self.accumulator, operand)
+                elif opcode == 43:
+                    ControlOps.halt()
                     break
-            elif opcode == 31:
-                if not self.subtract(operand):
+                else:
+                    print("Error: Invalid opcode.")
+                    OutputHandler.write_to_output("Error: Invalid opcode.")
                     break
-            elif opcode == 32:
-                if not self.divide(operand):
-                    break
-            elif opcode == 33:
-                if not self.multiply(operand):
-                    break
-            elif opcode == 40:
-                self.branch(operand)
-            elif opcode == 41:
-                self.branchneg(operand)
-            elif opcode == 42:
-                self.branchzero(operand)
-            elif opcode == 43:
-                if self.halt(operand) == False:
-                    break
-            else:
-                print("Error: Invalid opcode.")
+            except:
+                # print("Try block failed")
                 break
 
             # Check for accumulator overflow after potential overflow operations
             if not -9999 <= self.accumulator <= 9999:
                 print("Error: Accumulator overflow.")
+                OutputHandler.write_to_output("Error: Accumulator overflow.")
                 return
 
 def read_file(filename):
