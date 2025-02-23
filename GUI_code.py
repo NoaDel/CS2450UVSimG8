@@ -145,6 +145,8 @@ class GUI():
         New_file_button.bind('<Enter>', lambda event: GUI.on_hover(event, New_file_button, GUI.theme.menu_button_highlight_color))             
         New_file_button.bind('<Leave>', lambda event: GUI.on_leave(event, New_file_button))
 
+        New_file_button.config(state=tk.DISABLED)
+
         setting_button = tk.Button(frame, text="Settings", command= lambda: GUI.focus_setting_window(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="light grey")
         setting_button.place(relx=.15,rely=0,relwidth=.08, relheight=1)
         setting_button.bind('<Enter>', lambda event: GUI.on_hover(event, setting_button, GUI.theme.menu_button_highlight_color))             
@@ -255,6 +257,10 @@ class GUI():
         dark_theme_btn = tk.Button(setting_theme_frame, text = 'dark', width=int(9), height=int(.5), pady = 10,font=(default_fonts.setting_selected_font if GUI.theme.name == "dark_theme" else default_fonts.setting_font))
         dark_theme_btn.config(command=lambda: GUI.change_theme("dark_theme", dark_theme_btn))
         dark_theme_btn.pack(side=tk.RIGHT, padx=(5,20))
+
+        default_theme_btn.config(state=tk.DISABLED)
+        light_theme_btn.config(state=tk.DISABLED)
+        dark_theme_btn.config(state=tk.DISABLED)
 
         GUI.theme_buttons = []
         GUI.theme_buttons.append(default_theme_btn)
