@@ -1,6 +1,8 @@
 import tkinter as tk
-from tkinter import ttk 
-from GUI_settings import *
+from tkinter import ttk
+from GUI_settings import default_colors, default_fonts
+from UVSim import UVSim
+from output_handler import OutputHandler
 
 
 # Placeholder functions for import, save, and run actions
@@ -18,13 +20,21 @@ def save_prog():
 
 def run_prog():
     """Simulates running a program. Replace with actual execution logic."""
+    
+    OutputHandler.set_boxes(GUI.output_box, GUI.output_box) #Edit if needed
+    simulator = UVSim()
+    program = [int(line.strip().lstrip('+')) for line in GUI.read_from_editor() if line.strip()]
+    # print(program) #Confirms program is correctly set into the array
     print("running program...")
-    code = GUI.read_from_editor()
-    GUI.write_to_output(code)
-    print(repr(code))
+    GUI.write_to_output("Running program...")
+
+    simulator.load_program(program) #The reason for inputting 1: is because the first instruction is always invalid
+    simulator.execute_program()
+    GUI.write_to_output("\n") #Separates different program runnings
 
 class GUI():
     """Graphical User Interface class for UVSim."""
+
     def write_to_output(text: str):
         """Writes text to the output window."""
         GUI.output_box.config(state=tk.NORMAL)
@@ -32,10 +42,10 @@ class GUI():
         GUI.output_box.config(state=tk.DISABLED)
         GUI.output_box.yview(tk.END)                #includes a trailing new line char
 
-    def read_from_editor() -> str:
+    def read_from_editor():
         """Reads and returns the text from the editor."""
-        return GUI.text_editor.get("1.0", "end-1c")  # Exclude the trailing newline
-
+        return GUI.text_editor.get("1.0", "end-1c").split('\n') # Exclude the trailing newline
+    
     def focus_setting_window():
         GUI.setting_frame.lift(GUI.main_frame)
 
@@ -61,21 +71,20 @@ class GUI():
 
         GUI.focus_file(new_button)
 
-    def on_hover(event, button, color):
+    def on_hover(event, button):
         """Changes button color on hover."""
-        button.color = button["background"]
-        button.config(bg=color)
+        button.config(bg=default_colors.menu_button_highlight_color)
 
     def on_leave(event, button):
         """Restores button color when not hovered."""
-        button.config(bg=button.color)
+        button.config(bg=default_colors.menu_button_color)
 
     def clear_output():
         GUI.output_box.config(state=tk.NORMAL)
         GUI.output_box.delete("1.0", tk.END)
         GUI.output_box.config(state=tk.DISABLED)
         GUI.write_to_output("output: ")
-
+    
     def change_theme(name, button):
         if name == LightTheme.name:
             GUI.theme = LightTheme()
@@ -204,13 +213,13 @@ class GUI():
 
         # Function to write text to the output box
         
-        GUI.write_to_output("output:")
+        GUI.write_to_output("Output:")
         
         GUI.trash_img = tk.PhotoImage(file="trash.png")
         # trash_button = tk.Button(frame, text="🗑", font=("Arial", 20), padx=0, pady=0, command=GUI.clear_output)
         trash_button = tk.Button(GUI.output_box, image=GUI.trash_img, bg=GUI.theme.output_color, activebackground="grey", bd=0, command=GUI.clear_output)
         trash_button.place(relx=1.0, x=-30, rely=0.01)
-
+    
     def create_setting_header(frame):
         save_n_exit_button = tk.Button(frame, text="Save & Exit",bd=0,bg=GUI.theme.menu_button_color, fg=GUI.theme.text_color, command=GUI.focus_main_window)
         save_n_exit_button.place(relx=0,rely=0,relwidth=.1, relheight=1)
@@ -258,7 +267,6 @@ def main():
     GUI.create_setting_window(setting_window)
 
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
