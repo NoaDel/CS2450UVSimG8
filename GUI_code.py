@@ -37,6 +37,7 @@ def run_prog():
 class GUI():
     """Graphical User Interface class for UVSim."""
 
+    #contains a refrence every single widget
     widgets = []
 
     def write_to_output(text: str):
@@ -224,14 +225,14 @@ class GUI():
             line_numbers.yview(*args)
 
         # Create a text box widget
-        GUI.text_editor = tk.Text(frame, wrap=tk.WORD, insertbackground=GUI.theme.text_color,font=default_fonts.editor_font, fg=GUI.theme.text_color, undo=True, bg=GUI.theme.editor_color, bd=0)
+        GUI.text_editor = tk.Text(frame, wrap=tk.WORD, insertbackground=GUI.theme.text_color,font=default_fonts.editor_font,width=6, fg=GUI.theme.text_color, undo=True, bg=GUI.theme.editor_color, bd=0)
         GUI.text_editor.bg = GUI.theme.editor_color
         GUI.text_editor.fg = GUI.theme.text_color
         GUI.text_editor.cursor = GUI.theme.text_color
         GUI.widgets.append(GUI.text_editor)
         
          # Create a line number text box
-        line_numbers = tk.Text(frame, wrap=tk.WORD, font=default_fonts.line_num_font, fg=GUI.theme.text_color, width=4, padx=5, takefocus=0, state=tk.DISABLED, bg=GUI.theme.line_num_color, bd=0)
+        line_numbers = tk.Text(frame, wrap=tk.WORD, font=default_fonts.line_num_font, fg=GUI.theme.text_color, width=3, padx=5, takefocus=0, state=tk.DISABLED, bg=GUI.theme.line_num_color, bd=0)
         line_numbers.bg = GUI.theme.line_num_color
         line_numbers.fg = GUI.theme.text_color
         GUI.widgets.append(line_numbers)
@@ -245,7 +246,7 @@ class GUI():
         Input_frame = tk.Frame(frame, bg=GUI.theme.editor_color,width=90, padx=5,)
         
         # ADD a input widgets
-        GUI.input_box = tk.Text(Input_frame, wrap=tk.WORD, insertbackground=GUI.theme.text_color,font=default_fonts.editor_font, fg=GUI.theme.text_color, undo=True, bg=GUI.theme.editor_color, bd=0)
+        GUI.input_box = tk.Text(Input_frame, wrap=tk.WORD, insertbackground=GUI.theme.text_color,font=default_fonts.editor_font, fg=GUI.theme.text_color, undo=True, bg=GUI.theme.editor_color, bd=0, width=1)
         GUI.input_box.bg = GUI.theme.editor_color
         GUI.input_box.fg = GUI.theme.text_color
         GUI.input_box.cursor = GUI.theme.text_color
@@ -285,7 +286,7 @@ class GUI():
         """Creates the output window with a scrollbar."""
 
         # Create a text box widget (output window)
-        GUI.output_box = tk.Text(frame, wrap=tk.WORD, fg=GUI.theme.text_color, font=default_fonts.output_font, state=tk.DISABLED, bg=GUI.theme.output_color, bd=0)
+        GUI.output_box = tk.Text(frame, wrap=tk.WORD, width=1, fg=GUI.theme.text_color, font=default_fonts.output_font, state=tk.DISABLED, bg=GUI.theme.output_color, bd=0)
         GUI.output_box.bg = GUI.theme.output_color
         GUI.output_box.fg = GUI.theme.text_color
         GUI.widgets.append(GUI.output_box)
@@ -297,7 +298,7 @@ class GUI():
         # Pack widgets
         GUI.output_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
+        
         GUI.write_to_output("Output:")
         
         GUI.trash_img = tk.PhotoImage(file="trash.png")
