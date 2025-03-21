@@ -14,6 +14,7 @@ class UVSim:
             self.memory[i] = instruction
 
     def execute_program(self):
+        print(self.memory)
         while True:
             try:
                 instruction = self.memory[self.instruction_counter]
@@ -26,9 +27,7 @@ class UVSim:
 
                 # Execute the appropriate function based on the opcode
                 if opcode == 10:
-                    # print("Counter", self.instruction_counter)
                     self.instruction_counter = IO.read(self.memory, self.instruction_counter, operand)
-                    # print("Counter", self.instruction_counter)
                 elif opcode == 11:
                     IO.write(self.memory, operand)
                 elif opcode == 20:
@@ -66,7 +65,8 @@ class UVSim:
                     break
                 else:
                     print("Error: Invalid opcode.")
-                    OutputHandler.write_to_output("Error: Invalid opcode.")
+                    OutputHandler.write_to_output("ERROR: Invalid opcode detected. Program halted.")
+                    ControlOps.halt()
                     break
             except:
                 # print("Try block failed")
@@ -75,7 +75,7 @@ class UVSim:
             # Check for accumulator overflow after potential overflow operations
             if not -9999 <= self.accumulator <= 9999:
                 print("Error: Accumulator overflow.")
-                OutputHandler.write_to_output("Error: Accumulator overflow.")
+                OutputHandler.write_to_output("ERROR: Accumulator overflow.")
                 return
 
 def read_file(filename):
