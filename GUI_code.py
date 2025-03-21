@@ -25,14 +25,26 @@ def run_prog():
 
     OutputHandler.set_boxes(GUI.output_box, GUI.output_box) #Edit if needed
     simulator = UVSim()
-    program = [int(line.strip().lstrip('+')) for line in GUI.read_from_editor() if line.strip()]
+    program = validate_program(GUI.read_from_editor())
+    
+    if len(program) > 100: #Checks length of program is 100 lines or less.
+        GUI.write_to_output("ERROR: Program is too long (100 command limit)\n")
     # print(program) #Confirms program is correctly set into the array
-    print("running program...")
-    GUI.write_to_output("Running program...")
+    elif OutputHandler.input_invalid: #Verifies integer inputs are given
+        GUI.write_to_output('ERROR: This program requires integer inputs.')
+    else:
+        print("running program...")
+        GUI.write_to_output("Running program...")
 
-    simulator.load_program(program) #The reason for inputting 1: is because the first instruction is always invalid
-    simulator.execute_program()
-    GUI.write_to_output("\n") #Separates different program runnings
+        simulator.load_program(program)
+        simulator.execute_program()
+        GUI.write_to_output("\n") #Separates different program runnings
+
+def validate_program(program): #Enters as editor text, returns array
+    try:
+        return [int(line.strip().lstrip('+')) for line in program if line.strip()]
+    except ValueError:
+        GUI.write_to_output(f"ERROR: Non-integer character detected in program.")
 
 class GUI():
     """Graphical User Interface class for UVSim."""
