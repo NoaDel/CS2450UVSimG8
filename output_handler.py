@@ -3,16 +3,11 @@ import time
 class OutputHandler:
     output_box = None
     input_box = None
+    input_invalid = True #We test if inputs are valid
     """
     I recommend adding a terminal_box when making the box for integer arguments
     """
     value = 0 #Used for the hard-coded read function, edit if needed
-
-    @classmethod
-    def get_input_vals(cls, lyst):
-        cls.input_vals = []
-        for i in lyst:
-            cls.input_vals.append(int(i))
 
     @classmethod
     def set_boxes(cls, output_box, input_box):
@@ -28,6 +23,16 @@ class OutputHandler:
             cls.output_box.insert('end', text + "\n")
             cls.output_box.config(state='disabled')
             cls.output_box.yview('end')
+    
+    @classmethod
+    def get_input_vals(cls, lyst):
+        cls.input_vals = []
+        try:
+            for i in lyst:
+                cls.input_vals.append(int(i))
+            cls.input_invalid = False
+        except ValueError:
+            cls.input_invalid = True
     
     @classmethod
     async def get_int_input(cls):
