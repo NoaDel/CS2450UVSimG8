@@ -1,4 +1,5 @@
 import sys
+import re
 from IO_Ops import IO
 import ArithOps, ControlOps
 from output_handler import OutputHandler
@@ -79,18 +80,34 @@ class UVSim:
                 return
 
 def read_file(filename):
+    cleaned_lines = clean_program_file(filename)
+    try:
+        my_program = [int(line) for line in cleaned_lines]
+        return my_program
+    except ValueError as e:
+        print(f"Error: Non-integer value found in cleaned file. {e}")
+        return []
+
+def clean_program_file(filename):
     try:
         with open(filename, 'r') as file:
-            lines = file.readlines()  # Reads all lines into a list
-            # print(lines)
-            my_program = [int(line.strip().lstrip('+')) for line in lines]
-            # print(my_program)
-            return my_program
-            # You can further process 'values' as needed
+            content = file.read()
+        content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+        
+        # remove all + signs
+        content = content.replace('+', '')
+
+        # remove excessive newlines
+        lines = [line.strip() for line in content.splitlines()]
+        # remove empty lines
+        lines = [line for line in lines if line]
+        return lines
     except FileNotFoundError:
         print(f"Error: The file '{filename}' was not found.")
-    except Exception:
-        print(f"'{filename}' could not be read.")
+        return []
+    except Exception as e:
+        print(f"'{filename}' could not be processed. Error: {e}")
+        return []
 
 if __name__ == "__main__":
     simulator = UVSim()
