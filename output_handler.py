@@ -4,6 +4,7 @@ class OutputHandler:
     output_box = None
     input_box = None
     input_invalid = True #We test if inputs are valid
+    via_terminal = False
     """
     I recommend adding a terminal_box when making the box for integer arguments
     """
