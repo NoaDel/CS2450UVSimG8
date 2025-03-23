@@ -34,22 +34,22 @@ Fantastic question! We're glad you asked! The Sim in our name stands for simulat
 
 Using these operations, users should be able to simulate their own machine code!
 
-## 2. How to run UVSim
+## 2. How to run UVSim via Terminal
 
 Users will need to install Python 3 on their local machine to run UVSim.
 
-Machine code instructions should be in a text file, and each instruction must begin with a plus sign to represent the start of the instruction, and end with a newline.
+Machine code instructions should be in a text file, and each instruction must begin with a plus sign to represent the start of the instruction, and end with a newline. To add comments, use /* at the beginning and */ to close the comment.
 
 Here is one example of an instruction set that reads two integers and outputs the sum:
 
 ```
-+1095  # READ A
-+1096  # READ B
-+2095  # LOAD A
-+3096  # ADD B
-+2197  # STORE RESULT
-+1197  # WRITE RESULT
-+4300  # HALT
++1095  /* READ A */
++1096  /* READ B */
++2095  /* LOAD A */
++3096  /* ADD B */
++2197  /* STORE RESULT */
++1197  /* WRITE RESULT */
++4300  /* HALT */
 ```
 
 To run UVSim on the command line, use this command, replacing the last argument with the name of the text file being used:
@@ -58,5 +58,19 @@ To run UVSim on the command line, use this command, replacing the last argument 
 python3 UVSim.py {.txt file}
 ```
 
+## 3. How to run UVSim via GUI
+
+Users will need to install Python 3 on their local machine to run UVSim.
+
+To run UVSim on the GUI, use this command:
+
+```
+python3 GUI_code.py
+```
+
+Machine code instructions can be placed in the GUI editor. To add comments, use /* at the beginning and */ to close the comment. If the read operation is being used (opcode 10), include your inputs in the input box on the right hand side before running the program. 
+
+Use the navigation menu as needed to import, save, or make new files. Click on settings to change the theme, and run to run your program!
+
 Thanks for giving UVSim a try!
-Last updated Feb. 7, 2025
+Last updated Mar. 22, 2025
