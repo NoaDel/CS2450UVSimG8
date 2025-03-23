@@ -15,12 +15,12 @@ class UVSim:
             self.memory[i] = instruction
 
     def execute_program(self):
-        print(self.memory)
+        # print(self.memory)
         while True:
             try:
                 instruction = self.memory[self.instruction_counter]
                 # .rstrip('\n').lstrip('+')
-                print(instruction)
+                # print(instruction)
                 opcode = instruction // 100
                 operand = instruction % 100
 
@@ -114,5 +114,13 @@ if __name__ == "__main__":
     input_file = sys.argv[1]
     program = read_file(input_file)
 
-    simulator.load_program(program)
-    simulator.execute_program()
+    if len(program) > 100:
+        print("ERROR: Program is too long (100 command limit)\n")
+    # print(program) #Confirms program is correctly set into the array
+    else:
+        print("Running program...")
+        OutputHandler.via_terminal = True
+        simulator.load_program(program) #The reason for inputting 1: is because the first instruction is always invalid
+        simulator.execute_program()
+        print('\n')
+        OutputHandler.via_terminal = False #Resets
