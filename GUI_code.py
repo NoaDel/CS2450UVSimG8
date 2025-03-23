@@ -201,13 +201,13 @@ class GUI():
         save_button.fg = GUI.theme.text_color
         GUI.widgets.append(save_button)
 
-        New_file_button = tk.Button(frame, text=" New ", command= lambda: GUI.create_new_file(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="grey")
-        New_file_button.grid(row=1,column=3)
-        New_file_button.bind('<Enter>', lambda event: GUI.on_hover(event, New_file_button, GUI.theme.menu_button_highlight_color))             
-        New_file_button.bind('<Leave>', lambda event: GUI.on_leave(event, New_file_button))
-        New_file_button.bg = GUI.theme.menu_button_color
-        New_file_button.fg = GUI.theme.text_color
-        GUI.widgets.append(New_file_button)
+        # New_file_button = tk.Button(frame, text=" New ", command= lambda: GUI.create_new_file(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="grey")
+        # New_file_button.grid(row=1,column=3)
+        # New_file_button.bind('<Enter>', lambda event: GUI.on_hover(event, New_file_button, GUI.theme.menu_button_highlight_color))             
+        # New_file_button.bind('<Leave>', lambda event: GUI.on_leave(event, New_file_button))
+        # New_file_button.bg = GUI.theme.menu_button_color
+        # New_file_button.fg = GUI.theme.text_color
+        # GUI.widgets.append(New_file_button)
 
         setting_button = tk.Button(frame, text=" Settings " , command= lambda: GUI.focus_setting_window(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="light grey")
         setting_button.grid(row=1,column=4)
