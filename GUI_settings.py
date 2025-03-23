@@ -27,8 +27,8 @@ class DefaultTheme():
     header_color = rgb_2_hex(76,114,29)
     file_header_color = rgb_2_hex(230, 230, 230)
     editor_color = rgb_2_hex(255, 255, 255)
-    line_num_color = rgb_2_hex(220, 230, 220)
-    output_color = rgb_2_hex(200, 210, 200)
+    line_num_color = rgb_2_hex(204, 204, 204)
+    output_color = rgb_2_hex(0, 104, 56)
     setting_content_color = rgb_2_hex(220, 230, 220)
 
     # Button colors
@@ -48,9 +48,9 @@ class DefaultTheme():
         self.header_color = [rgb_2_hex(76,114,29)]
         self.file_header_color = [rgb_2_hex(230, 230, 230)]
         self.editor_color = [rgb_2_hex(255, 255, 255)]
-        self.line_num_color = [rgb_2_hex(220, 230, 220)]
-        self.output_color = [rgb_2_hex(200, 210, 200)]
-        self.setting_content_color = [rgb_2_hex(180, 180, 180)]
+        self.line_num_color = [rgb_2_hex(204, 204, 204)]
+        self.output_color = [rgb_2_hex(0, 104, 56)]
+        self.setting_content_color = [rgb_2_hex(220, 230, 220)]
 
         # Button colors
         self.menu_button_color = [rgb_2_hex(76,114,29)]
