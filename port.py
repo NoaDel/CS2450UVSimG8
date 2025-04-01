@@ -1,6 +1,6 @@
 import os
 
-def pad_codes_to_new_file(input_file_path):
+def port(input_file_path):
     """
     Reads a .txt file containing codes and adds two leading zeros to the numeric part of each code
     (behind the optional + or - sign). Saves the modified codes to a new file with "(port)" appended
