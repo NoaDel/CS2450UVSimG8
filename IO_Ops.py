@@ -9,11 +9,11 @@ class IO:
             print('before')
             value = OutputHandler.input_vals.pop(0)
             print('after')
-            if -9999 <= value <= 9999:
+            if -999999 <= value <= 999999: #6 digit handling
                 memory[operand] = value
             else:
-                OutputHandler.write_to_output("ERROR: Input out of accepting range -9999 to 9999. Program halted.")
-                print("Error: Input out of range (-9999 to 9999).")
+                OutputHandler.write_to_output("ERROR: Input out of accepting range -999999 to 999999. Program halted.")
+                print("Error: Input out of range (-999999 to 999999).")
                 while memory[instruction_counter] != '0':
                     instruction_counter += 1  # Re-execute
                 instruction_counter -= 1
@@ -21,11 +21,11 @@ class IO:
             while True:
                 try:
                     value = int(input("Enter an integer: "))
-                    if -9999 <= value <= 9999:
+                    if -999999 <= value <= 999999:
                         memory[operand] = value
                         break
                     else:
-                        print("Error: Input out of range (-9999 to 9999).")
+                        print("Error: Input out of range (-999999 to 999999).")
                 except:
                     print("Error: Invalid input type.")
 
