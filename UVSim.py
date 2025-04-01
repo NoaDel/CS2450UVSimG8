@@ -6,7 +6,7 @@ from output_handler import OutputHandler
 
 class UVSim:
     def __init__(self):
-        self.memory = [0] * 100
+        self.memory = [0] * 250
         self.accumulator = 0
         self.instruction_counter = 0
 
@@ -74,7 +74,7 @@ class UVSim:
                 break
 
             # Check for accumulator overflow after potential overflow operations
-            if not -9999 <= self.accumulator <= 9999:
+            if not -999999 <= self.accumulator <= 999999:
                 print("Error: Accumulator overflow.")
                 OutputHandler.write_to_output("ERROR: Accumulator overflow.")
                 return
@@ -96,6 +96,11 @@ def clean_program_file(filename):
         
         # remove all + signs
         content = content.replace('+', '')
+        for line in content.split("\n"):
+            # print(len(line))
+            if len(line) > 7:
+                print("Error: Commands must be in 6-digit words.")
+                return []
 
         # remove excessive newlines
         lines = [line.strip() for line in content.splitlines()]
@@ -114,13 +119,14 @@ if __name__ == "__main__":
     input_file = sys.argv[1]
     program = read_file(input_file)
 
-    if len(program) > 100:
-        print("ERROR: Program is too long (100 command limit)\n")
+    if len(program) > 250:
+        print("ERROR: Program is too long (250 command limit)\n")
     # print(program) #Confirms program is correctly set into the array
     else:
-        print("Running program...")
         OutputHandler.via_terminal = True
         simulator.load_program(program) #The reason for inputting 1: is because the first instruction is always invalid
-        simulator.execute_program()
-        print('\n')
+        if len(program) > 0:
+            simulator.execute_program()
+        else:
+            print("Program could not be executed.\n")
         OutputHandler.via_terminal = False #Resets
