@@ -2,7 +2,7 @@ from output_handler import OutputHandler
 # Arithmetic Operations
 def add(accum, memory, operand):
     accum += memory[operand]
-    if not (-9999 <= accum <= 9999):
+    if not (-999999 <= accum <= 999999):
         OutputHandler.write_to_output("Error: Overflow during addition.")
         print("Error: Overflow during addition.")
         return (False, accum)
@@ -11,7 +11,7 @@ def add(accum, memory, operand):
 
 def subtract(accum, memory, operand):
     accum -= memory[operand]
-    if not (-9999 <= accum <= 9999):
+    if not (-999999 <= accum <= 999999):
         OutputHandler.write_to_output("Error: Overflow during subtraction.")
         print("Error: Overflow during subtraction.")
         return (False, accum)
@@ -27,7 +27,7 @@ def divide(accum, memory, operand):
 
 def multiply(accum, memory, operand):
     accum *= memory[operand]
-    if not (-9999 <= accum <= 9999):
+    if not (-999999 <= accum <= 999999):
         OutputHandler.write_to_output("Error: Overflow during multiplication.")
         print("Error: Overflow during multiplication.")
         return (False, accum)
