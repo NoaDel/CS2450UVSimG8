@@ -26,23 +26,25 @@ def run_prog():
     OutputHandler.set_boxes(GUI.output_box, GUI.output_box) #Edit if needed
     simulator = UVSim()
     program = validate_program(GUI.read_from_editor())
-    
-    if len(program) > 100: #Checks length of program is 100 lines or less.
+    # program = [int(line.strip().lstrip('+')) for line in GUI.read_from_editor() if line.strip()]
+    if len(program) > 250:
         GUI.write_to_output("ERROR: Program is too long (100 command limit)\n")
     # print(program) #Confirms program is correctly set into the array
-    elif OutputHandler.input_invalid: #Verifies integer inputs are given
+    elif OutputHandler.input_invalid:
         GUI.write_to_output('ERROR: This program requires integer inputs.')
     else:
         print("running program...")
         GUI.write_to_output("Running program...")
 
-        simulator.load_program(program)
+        simulator.load_program(program) #The reason for inputting 1: is because the first instruction is always invalid
         simulator.execute_program()
         GUI.write_to_output("\n") #Separates different program runnings
 
 def validate_program(program): #Enters as editor text, returns array
+    i = 0 # We assign here rather than use enumerate() because except block needs it for ERROR messaging
     try:
-        return [int(line.strip().lstrip('+')) for line in program if line.strip()]
+        my_program = [int(line.strip().lstrip('+')) for line in program if line.strip()]
+        return my_program
     except ValueError:
         GUI.write_to_output(f"ERROR: Non-integer character detected in program.")
 
@@ -201,13 +203,13 @@ class GUI():
         save_button.fg = GUI.theme.text_color
         GUI.widgets.append(save_button)
 
-        # New_file_button = tk.Button(frame, text=" New ", command= lambda: GUI.create_new_file(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="grey")
-        # New_file_button.grid(row=1,column=3)
-        # New_file_button.bind('<Enter>', lambda event: GUI.on_hover(event, New_file_button, GUI.theme.menu_button_highlight_color))             
-        # New_file_button.bind('<Leave>', lambda event: GUI.on_leave(event, New_file_button))
-        # New_file_button.bg = GUI.theme.menu_button_color
-        # New_file_button.fg = GUI.theme.text_color
-        # GUI.widgets.append(New_file_button)
+        New_file_button = tk.Button(frame, text=" New ", command= lambda: GUI.create_new_file(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="grey")
+        New_file_button.grid(row=1,column=3)
+        New_file_button.bind('<Enter>', lambda event: GUI.on_hover(event, New_file_button, GUI.theme.menu_button_highlight_color))             
+        New_file_button.bind('<Leave>', lambda event: GUI.on_leave(event, New_file_button))
+        New_file_button.bg = GUI.theme.menu_button_color
+        New_file_button.fg = GUI.theme.text_color
+        GUI.widgets.append(New_file_button)
 
         setting_button = tk.Button(frame, text=" Settings " , command= lambda: GUI.focus_setting_window(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="light grey")
         setting_button.grid(row=1,column=4)
@@ -227,6 +229,33 @@ class GUI():
 
     def create_file_header(file_header):
         GUI.file_buttons = []
+
+    def create_output_window(frame):
+        """Creates the output window with a scrollbar."""
+
+        # Create a text box widget (output window)
+        GUI.output_box = tk.Text(frame, wrap=tk.WORD, width=1, fg=GUI.theme.text_color, font=default_fonts.output_font, state=tk.DISABLED, bg=GUI.theme.output_color, bd=0)
+        GUI.output_box.bg = GUI.theme.output_color
+        GUI.output_box.fg = GUI.theme.text_color
+        GUI.widgets.append(GUI.output_box)
+
+        # Add a scrollbar
+        scrollbar = tk.Scrollbar(frame, command=GUI.output_box.yview)
+        GUI.output_box.config(yscrollcommand=scrollbar.set)
+
+        # Pack widgets
+        GUI.output_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        GUI.write_to_output("Output:")
+        
+        GUI.trash_img = tk.PhotoImage(file="trash.png")
+        # trash_button = tk.Button(frame, text="🗑", font=("Arial", 20), padx=0, pady=0, command=GUI.clear_output)
+        trash_button = tk.Button(GUI.output_box, image=GUI.trash_img, bg=GUI.theme.output_color, activebackground="grey", bd=0, command=GUI.clear_output)
+        trash_button.bg = GUI.theme.output_color
+        trash_button.fg = GUI.theme.text_color
+        GUI.widgets.append(trash_button)
+        trash_button.place(relx=1.0, x=-30, rely=0.01)
 
     def create_editor(frame):
         """Creates the text editor with line numbers and scrollbar."""
@@ -279,12 +308,20 @@ class GUI():
 
         def update_line_numbers(event=None):
             """Updates the line number text box."""
+            line_count = GUI.text_editor.get("1.0", tk.END).count("\n")
+
+            if line_count > 250:
+                valid_content = "\n".join(GUI.text_editor.get("1.0", tk.END).split("\n")[:250]) #Keeps the first 250 lines
+
+                GUI.text_editor.delete("1.0", tk.END)
+                GUI.text_editor.insert("1.0", valid_content)
+
+                GUI.write_to_output("ERROR: Maximum 250 lines allowed")
+
             line_numbers.config(state=tk.NORMAL)
             line_numbers.delete("1.0", tk.END)
             
-            line_count = GUI.text_editor.get("1.0", tk.END).count("\n")
             line_numbers.insert(tk.END, "\n".join(str(i) for i in range(1, line_count + 1)))
-            
             line_numbers.config(state=tk.DISABLED)
 
         # bind the update_line_numbers whenever the user types
@@ -293,33 +330,6 @@ class GUI():
         
         # Call update_line_numbers initially to show line numbers from the start
         update_line_numbers()
-
-    def create_output_window(frame):
-        """Creates the output window with a scrollbar."""
-
-        # Create a text box widget (output window)
-        GUI.output_box = tk.Text(frame, wrap=tk.WORD, width=1, fg=GUI.theme.text_color, font=default_fonts.output_font, state=tk.DISABLED, bg=GUI.theme.output_color, bd=0)
-        GUI.output_box.bg = GUI.theme.output_color
-        GUI.output_box.fg = GUI.theme.text_color
-        GUI.widgets.append(GUI.output_box)
-
-        # Add a scrollbar
-        scrollbar = tk.Scrollbar(frame, command=GUI.output_box.yview)
-        GUI.output_box.config(yscrollcommand=scrollbar.set)
-
-        # Pack widgets
-        GUI.output_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        GUI.write_to_output("Output:")
-        
-        GUI.trash_img = tk.PhotoImage(file="trash.png")
-        # trash_button = tk.Button(frame, text="🗑", font=("Arial", 20), padx=0, pady=0, command=GUI.clear_output)
-        trash_button = tk.Button(GUI.output_box, image=GUI.trash_img, bg=GUI.theme.output_color, activebackground="grey", bd=0, command=GUI.clear_output)
-        trash_button.bg = GUI.theme.output_color
-        trash_button.fg = GUI.theme.text_color
-        GUI.widgets.append(trash_button)
-        trash_button.place(relx=1.0, x=-30, rely=0.01)
     
     def create_setting_header(frame):
         save_n_exit_button = tk.Button(frame, text="Save & Exit",bd=0,bg=GUI.theme.menu_button_color, fg=GUI.theme.text_color, command=GUI.focus_main_window)
