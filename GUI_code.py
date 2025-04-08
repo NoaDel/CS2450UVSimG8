@@ -6,22 +6,28 @@ from output_handler import OutputHandler
 
 def import_prog():
     file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
+    
     if file_path:
-            with open(file_path, 'r') as file:
-                GUI.text_editor.delete('1.0', tk.END)
-                GUI.text_editor.insert('1.0', file.read())
+        file_name = file_path.split("/")[-1]                    # Extract the file name
+        GUI.current_file_btn.config(text=f"  {file_name}  ")    # Update the button text with the file name
+        with open(file_path, 'r') as file:
+            GUI.current_editor.text_editor.delete('1.0', tk.END)
+            GUI.current_editor.text_editor.insert('1.0', file.read())
     print("importing program...")
-    GUI.update_line_numbers()
+    GUI.current_editor.update_line_numbers()
 
 def save_prog():
     file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt")])
+
     if file_path:
+        file_name = file_path.split("/")[-1]                    # Extract the file name
+        GUI.current_file_btn.config(text=f"  {file_name}  ")    # Update the button text with the file name
         with open(file_path, 'w') as file:
             file.write(GUI.text_editor.get('1.0', tk.END))
     print("saving program...")
 
 def run_prog():
-    OutputHandler.get_input_vals(GUI.input_box.get("1.0", "end-1c").split('\n'))
+    OutputHandler.get_input_vals(GUI.current_editor.text_editor.get("1.0", "end-1c").split('\n'))
 
     OutputHandler.set_boxes(GUI.output_box, GUI.output_box) #Edit if needed
     simulator = UVSim()
@@ -53,6 +59,9 @@ class GUI():
 
     #contains a refrence every single widget
     widgets = []
+    editors = []
+    current_editor = None
+    current_file_btn = None
 
     def write_to_output(text: str):
         """Writes text to the output window."""
@@ -63,24 +72,34 @@ class GUI():
 
     def read_from_editor():
         """Reads and returns the text from the editor."""
-        return GUI.text_editor.get("1.0", "end-1c").split('\n') # Exclude the trailing newline
+        return GUI.current_editor.text_editor.get("1.0", "end-1c").split('\n') # Exclude the trailing newline
     
     def focus_setting_window():
-        GUI.setting_frame.lift(GUI.main_frame)
+        GUI.setting_frame.lift()
 
     def focus_main_window():
-        GUI.main_frame.lift(GUI.setting_frame)
+        GUI.main_frame.lift()
 
-    def focus_file(button):
+    def focus_file(editor, button):
+        GUI.current_editor = editor
+        GUI.current_file_btn = button
+
         for btn in GUI.file_buttons:
             btn.config(bg=GUI.theme.file_button_color)
         button.config(bg=GUI.theme.file_focus_color)
         button.color = button["background"]
 
+        if editor in GUI.editors:
+            editor.frame.lift()
+        else:
+            print("Error: Frame not found in editor frames.")
+
     def create_new_file():
+        editor = GUI.create_editor()
+
         new_button = tk.Button(GUI.file_header, text=f"    File {len(GUI.file_buttons)+1}    ", bg=GUI.theme.file_button_color, fg=GUI.theme.text_color,activebackground="grey", bd=0)
-        new_button.config(command= lambda : GUI.focus_file(new_button))
-        new_button.bind('<Enter>', lambda event: GUI.on_hover(event, new_button, GUI.theme.file_button_highlight_color))             
+        new_button.config(command=lambda editor_frame=editor.frame, new_button=new_button: GUI.focus_file(editor, new_button))
+        new_button.bind('<Enter>', lambda event: GUI.on_hover(event, new_button, GUI.theme.file_button_highlight_color))
         new_button.bind('<Leave>', lambda event: GUI.on_leave(event, new_button))
         new_button.bg = GUI.theme.file_button_color
         new_button.fg = GUI.theme.text_color
@@ -90,7 +109,7 @@ class GUI():
         for i, btn in enumerate(GUI.file_buttons):
             btn.grid(row=0, column=i, sticky="ns")
 
-        GUI.focus_file(new_button)
+        GUI.focus_file(editor, new_button)
 
     def on_hover(event, button, color):
         """Changes button color on hover."""
@@ -153,38 +172,37 @@ class GUI():
         GUI.setting_frame = tk.Frame(window)
         GUI.setting_frame.place(relx=0,rely=0,relwidth=1, relheight=1)
 
-        setting_header = tk.Frame(GUI.setting_frame, bg=GUI.theme.header_color)
-        setting_header.place(relx=0,rely=0,relwidth=1, relheight=.03)
+        GUI.setting_header = tk.Frame(GUI.setting_frame, bg=GUI.theme.header_color)
+        GUI.setting_header.place(relx=0,rely=0,relwidth=1, relheight=.03)
 
-        settings_content_frame = tk.Frame(GUI.setting_frame, bg=GUI.theme.editor_color)
-        settings_content_frame.place(relx=0,rely=.03,relwidth=1, relheight=.97)
+        GUI.settings_content_frame = tk.Frame(GUI.setting_frame, bg=GUI.theme.editor_color)
+        GUI.settings_content_frame.place(relx=0,rely=.03,relwidth=1, relheight=.97)
 
         GUI.main_frame = tk.Frame(window)
         GUI.main_frame.place(relx=0,rely=0,relwidth=1, relheight=1)
 
-        menu_header = tk.Frame(GUI.main_frame, bg=GUI.theme.header_color)
-        menu_header.place(relx=0,rely=0,relwidth=1, relheight=.03)
-        menu_header.bg = GUI.theme.header_color
-        GUI.widgets.append(menu_header)
+        GUI.menu_header = tk.Frame(GUI.main_frame, bg=GUI.theme.header_color)
+        GUI.menu_header.place(relx=0,rely=0,relwidth=1, relheight=.03)
+        GUI.menu_header.bg = GUI.theme.header_color
+        GUI.widgets.append(GUI.menu_header)
 
         GUI.file_header = tk.Frame(GUI.main_frame, bg=GUI.theme.file_header_color)
         GUI.file_header.place(relx=0,rely=.03,relwidth=1, relheight=.03)
         GUI.file_header.bg = GUI.theme.file_header_color
         GUI.widgets.append(GUI.file_header)
 
-        editor = tk.Frame(GUI.main_frame, bg=GUI.theme.editor_color)
-        editor.place(relx=0,rely=.06,relwidth=1, relheight=.57)
-        editor.bg = GUI.theme.editor_color
-        GUI.widgets.append(editor)
+        GUI.editor_frame = tk.Frame(GUI.main_frame, bg=GUI.theme.editor_color)
+        GUI.editor_frame.place(relx=0,rely=.06,relwidth=1, relheight=.57)
+        GUI.editor_frame.bg = GUI.theme.editor_color
+        GUI.widgets.append(GUI.editor_frame)
 
-        terminal = tk.Frame(GUI.main_frame, bg=GUI.theme.output_color)
-        terminal.place(relx=0,rely=.63,relwidth=1, relheight=.4)
-        terminal.bg = GUI.theme.output_color
-        GUI.widgets.append(terminal)
+        GUI.terminal = tk.Frame(GUI.main_frame, bg=GUI.theme.output_color)
+        GUI.terminal.place(relx=0,rely=.63,relwidth=1, relheight=.4)
+        GUI.terminal.bg = GUI.theme.output_color
+        GUI.widgets.append(GUI.terminal)
 
-        return menu_header, GUI.file_header, editor, terminal, setting_header, settings_content_frame
-
-    def create_menu_header(frame):
+    def create_menu_header():
+        frame = GUI.menu_header
         """Creates the header menu with Import, Save, and Run buttons."""
         import_button = tk.Button(frame, text=" Import ", command= lambda: import_prog(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="dark grey")
         import_button.grid(row=1,column=1)
@@ -227,11 +245,13 @@ class GUI():
         run_button.fg = GUI.theme.text_color
         GUI.widgets.append(run_button)
 
-    def create_file_header(file_header):
+    def create_file_header():
+        frame = GUI.file_header
         GUI.file_buttons = []
 
-    def create_output_window(frame):
+    def create_output_window():
         """Creates the output window with a scrollbar."""
+        frame = GUI.terminal
 
         # Create a text box widget (output window)
         GUI.output_box = tk.Text(frame, wrap=tk.WORD, width=1, fg=GUI.theme.text_color, font=default_fonts.output_font, state=tk.DISABLED, bg=GUI.theme.output_color, bd=0)
@@ -257,87 +277,25 @@ class GUI():
         GUI.widgets.append(trash_button)
         trash_button.place(relx=1.0, x=-30, rely=0.01)
 
-    def create_editor(frame):
+    def create_editor():
         """Creates the text editor with line numbers and scrollbar."""
-        #TODO Fix scrollbar sync bug
-
-        def on_scroll(*args):
-            GUI.text_editor.yview(*args)
-            line_numbers.yview(*args)
-
-        # Create a text box widget
-        GUI.text_editor = tk.Text(frame, wrap=tk.WORD, insertbackground=GUI.theme.text_color,font=default_fonts.editor_font,width=6, fg=GUI.theme.text_color, undo=True, bg=GUI.theme.editor_color, bd=0)
-        GUI.text_editor.bg = GUI.theme.editor_color
-        GUI.text_editor.fg = GUI.theme.text_color
-        GUI.text_editor.cursor = GUI.theme.text_color
-        GUI.widgets.append(GUI.text_editor)
-        
-         # Create a line number text box
-        line_numbers = tk.Text(frame, wrap=tk.WORD, font=default_fonts.line_num_font, fg=GUI.theme.text_color, width=3, padx=5, takefocus=0, state=tk.DISABLED, bg=GUI.theme.line_num_color, bd=0)
-        line_numbers.bg = GUI.theme.line_num_color
-        line_numbers.fg = GUI.theme.text_color
-        GUI.widgets.append(line_numbers)
-
-        # Add a scrollbar widget to the Text widget
-        scrollbar = tk.Scrollbar(frame, command=on_scroll)
-        GUI.text_editor.config(yscrollcommand=scrollbar.set)
-        line_numbers.config(yscrollcommand=scrollbar.set)
-
-        # Add input frame
-        Input_frame = tk.Frame(frame, bg=GUI.theme.editor_color,width=90, padx=5,)
-        
-        # ADD a input widgets
-        GUI.input_box = tk.Text(Input_frame, wrap=tk.WORD, insertbackground=GUI.theme.text_color,font=default_fonts.editor_font, fg=GUI.theme.text_color, undo=True, bg=GUI.theme.editor_color, bd=0, width=1)
-        GUI.input_box.bg = GUI.theme.editor_color
-        GUI.input_box.fg = GUI.theme.text_color
-        GUI.input_box.cursor = GUI.theme.text_color
-        GUI.widgets.append(GUI.input_box)
-
-        input_label = tk.Label(Input_frame, text="(each input\nmust be on\na new line)\n\ninputs:", bg=GUI.theme.editor_color, bd=0)
-        input_label.bg = GUI.theme.editor_color
-        input_label.fg = GUI.theme.text_color
-        GUI.widgets.append(input_label)
-
-        # Pack all the widgets
-        line_numbers.pack(side=tk.LEFT, fill=tk.Y)
-        GUI.text_editor.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        Input_frame.pack(side=tk.RIGHT, fill=tk.Y)
-        input_label.place(relx=0, rely=0, relwidth=1, relheight=.25)
-        GUI.input_box.place(relx=0, rely=.25, relwidth=1, relheight=.75)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-        def update_line_numbers(event=None):
-            """Updates the line number text box."""
-            line_count = GUI.text_editor.get("1.0", tk.END).count("\n")
-
-            if line_count > 250:
-                valid_content = "\n".join(GUI.text_editor.get("1.0", tk.END).split("\n")[:250]) #Keeps the first 250 lines
-
-                GUI.text_editor.delete("1.0", tk.END)
-                GUI.text_editor.insert("1.0", valid_content)
-
-                GUI.write_to_output("ERROR: Maximum 250 lines allowed")
-
-            line_numbers.config(state=tk.NORMAL)
-            line_numbers.delete("1.0", tk.END)
-            
-            line_numbers.insert(tk.END, "\n".join(str(i) for i in range(1, line_count + 1)))
-            line_numbers.config(state=tk.DISABLED)
-
-        # bind the update_line_numbers whenever the user types
-        GUI.text_editor.bind("<KeyPress>", update_line_numbers)
-        GUI.text_editor.bind("<KeyRelease>", update_line_numbers)
-        
-        # Call update_line_numbers initially to show line numbers from the start
-        update_line_numbers()
+        editor = Editor()
+        editor.create_editor(GUI.editor_frame)
+        GUI.editors.append(editor)
+        GUI.current_editor = editor
+        return editor
     
-    def create_setting_header(frame):
+    def create_setting_header():
+        frame = GUI.setting_header
+
         save_n_exit_button = tk.Button(frame, text="Save & Exit",bd=0,bg=GUI.theme.menu_button_color, fg=GUI.theme.text_color, command=GUI.focus_main_window)
         save_n_exit_button.place(relx=0,rely=0,relwidth=.1, relheight=1)
         save_n_exit_button.bind('<Enter>', lambda event: GUI.on_hover(event, save_n_exit_button, GUI.theme.menu_button_highlight_color))             
         save_n_exit_button.bind('<Leave>', lambda event: GUI.on_leave(event, save_n_exit_button))
 
-    def create_setting_window(frame):
+    def create_setting_window():
+        frame = GUI.settings_content_frame
+
         setting_theme_frame = tk.Frame(frame, bg=GUI.theme.setting_content_color)
         setting_theme_frame.pack(side=tk.TOP, fill=tk.X)
         
@@ -361,7 +319,70 @@ class GUI():
         dark_theme_btn.pack(side=tk.RIGHT, padx=(5,20))
 
         GUI.theme_buttons = [default_theme_btn, light_theme_btn, neutral_theme_btn, dark_theme_btn]
-    
+
+class Editor():
+    def __init__(self):
+        pass
+
+    def update_line_numbers(editor):
+        """Updates the line number text box."""
+        line_count = editor.text_editor.get("1.0", tk.END).count("\n")
+
+        if line_count > 250:
+            valid_content = "\n".join(GUI.text_editor.get("1.0", tk.END).split("\n")[:250])  # Keeps the first 250 lines
+            editor.text_editor.delete("1.0", tk.END)
+            editor.text_editor.insert("1.0", valid_content)
+            GUI.write_to_output("ERROR: Maximum 250 lines allowed")
+
+        editor.line_numbers.config(state=tk.NORMAL)
+        editor.line_numbers.delete("1.0", tk.END)
+        editor.line_numbers.insert(tk.END, "\n".join(str(i) for i in range(1, line_count + 1)))
+        editor.line_numbers.config(state=tk.DISABLED)
+
+    def create_editor(self, frame):
+        """Creates the text editor with line numbers and scrollbar."""
+        self.frame = tk.Frame(frame, bg=GUI.theme.editor_color)
+        self.frame.place(relx=0, rely=0, relwidth=1, relheight=1)
+
+        def on_scroll(*args):
+            self.text_editor.yview(*args)
+            self.line_numbers.yview(*args)
+
+        # Create a text box widget
+        self.text_editor = tk.Text(self.frame, wrap=tk.WORD, insertbackground=GUI.theme.text_color,
+                                font=default_fonts.editor_font, width=6, fg=GUI.theme.text_color,
+                                undo=True, bg=GUI.theme.editor_color, bd=0)
+        self.text_editor.bg = GUI.theme.editor_color
+        self.text_editor.fg = GUI.theme.text_color
+        self.text_editor.cursor = GUI.theme.text_color
+        GUI.widgets.append(self.text_editor)
+
+        # Create a line number text box
+        self.line_numbers = tk.Text(self.frame, wrap=tk.WORD, font=default_fonts.line_num_font,
+                                    fg=GUI.theme.text_color, width=3, padx=5, takefocus=0,
+                                    state=tk.DISABLED, bg=GUI.theme.line_num_color, bd=0)
+        self.line_numbers.bg = GUI.theme.line_num_color
+        self.line_numbers.fg = GUI.theme.text_color
+        GUI.widgets.append(self.line_numbers)
+
+        # Add a scrollbar widget to the Text widget
+        self.scrollbar = tk.Scrollbar(self.frame, command=on_scroll)
+        self.text_editor.config(yscrollcommand=self.scrollbar.set)
+        self.line_numbers.config(yscrollcommand=self.scrollbar.set)
+
+        # Bind the update_line_numbers method to key events
+        #TODO unbind the event when not in focus
+        self.text_editor.bind("<KeyPress>", lambda event: Editor.update_line_numbers(self))
+        self.text_editor.bind("<KeyRelease>", lambda event: Editor.update_line_numbers(self))
+
+        # Pack all the widgets
+        self.line_numbers.pack(side=tk.LEFT, fill=tk.Y)
+        self.text_editor.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Call update_line_numbers initially to show line numbers from the start
+        Editor.update_line_numbers(self)
+
 def main():
     """Main function to initialize and run the Tkinter GUI."""
     root = tk.Tk() 
@@ -370,13 +391,13 @@ def main():
 
     GUI.theme = DefaultTheme()
 
-    menu_header, file_header, editor_window, output_window, setting_header, setting_window = GUI.create_layout_frames(root)
-    GUI.create_menu_header(menu_header)
-    GUI.create_file_header(file_header)
-    GUI.create_editor(editor_window)
-    GUI.create_output_window(output_window)
-    GUI.create_setting_header(setting_header)
-    GUI.create_setting_window(setting_window)
+    GUI.create_layout_frames(root)
+    GUI.create_menu_header()
+    GUI.create_file_header()
+    GUI.create_new_file() # indirectly calls create_editor()
+    GUI.create_output_window()
+    GUI.create_setting_header()
+    GUI.create_setting_window()
 
     root.mainloop()
 
