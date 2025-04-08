@@ -23,7 +23,7 @@ def save_prog():
         file_name = file_path.split("/")[-1]                    # Extract the file name
         GUI.current_file_btn.config(text=f"  {file_name}  ")    # Update the button text with the file name
         with open(file_path, 'w') as file:
-            file.write(GUI.text_editor.get('1.0', tk.END))
+            file.write(GUI.current_editor.text_editor.get('1.0', tk.END))
     print("saving program...")
 
 def run_prog():
