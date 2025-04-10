@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, scrolledtext
 from GUI_settings import default_fonts, DefaultTheme, LightTheme, NeutralTheme, DarkTheme
 from UVSim import UVSim
 from output_handler import OutputHandler
+from port import port
 
 def import_prog():
     file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
@@ -47,6 +48,20 @@ def validate_program(program): #Enters as editor text, returns array
         return my_program
     except ValueError:
         GUI.write_to_output(f"ERROR: Non-integer character detected in program.")
+
+def run_port_script():
+    file_path = filedialog.askopenfilename(
+        title="Select 4-Digit Code File",
+        filetypes=[("Text Files", "*.txt")]
+    )
+    if file_path: # Proceed only if a file was selected
+        try:
+            port(file_path) # Call the function from port.py
+            GUI.write_to_output(f"Successfully converted '{file_path}'. Output saved as '{file_path.replace('.txt', ' (port).txt')}'.")
+        except Exception as e:
+            GUI.write_to_output(f"Error during conversion: {e}")
+    else:
+        GUI.write_to_output("File selection cancelled.")
 
 class GUI():
     """Graphical User Interface class for UVSim."""
@@ -211,8 +226,19 @@ class GUI():
         New_file_button.fg = GUI.theme.text_color
         GUI.widgets.append(New_file_button)
 
+        port_button = tk.Button(frame, text=" Convert 4->6 Digit ", command=lambda: run_port_script(),
+                                fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color,
+                                bd=0, activebackground="grey")
+        port_button.grid(row=1, column=4)
+        port_button.bind('<Enter>',
+                         lambda event: GUI.on_hover(event, port_button, GUI.theme.menu_button_highlight_color))
+        port_button.bind('<Leave>', lambda event: GUI.on_leave(event, port_button))
+        port_button.bg = GUI.theme.menu_button_color
+        port_button.fg = GUI.theme.text_color
+        GUI.widgets.append(port_button)
+
         setting_button = tk.Button(frame, text=" Settings " , command= lambda: GUI.focus_setting_window(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="light grey")
-        setting_button.grid(row=1,column=4)
+        setting_button.grid(row=1,column=5)
         setting_button.bind('<Enter>', lambda event: GUI.on_hover(event, setting_button, GUI.theme.menu_button_highlight_color))             
         setting_button.bind('<Leave>', lambda event: GUI.on_leave(event, setting_button))
         setting_button.bg = GUI.theme.menu_button_color
@@ -220,7 +246,7 @@ class GUI():
         GUI.widgets.append(setting_button)
 
         run_button = tk.Button(frame, text=" Run ", command= lambda: run_prog(), fg=GUI.theme.text_color, font=default_fonts.menu_font, bg=GUI.theme.menu_button_color, bd=0, activebackground="light grey")
-        run_button.grid(row=1,column=5)
+        run_button.grid(row=1,column=6)
         run_button.bind('<Enter>', lambda event: GUI.on_hover(event, run_button, GUI.theme.menu_button_highlight_color))             
         run_button.bind('<Leave>', lambda event: GUI.on_leave(event, run_button))
         run_button.bg = GUI.theme.menu_button_color
